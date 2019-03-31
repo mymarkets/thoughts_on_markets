@@ -1,0 +1,266 @@
+---
+title: "Labor_Market_Analysis"
+author: "Hyungjin Lim"
+date: "2018³â 4¿ù 5ÀÏ"
+output: word_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## R Markdown
+
+This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
+
+When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+
+```{r cars}
+summary(cars)
+```
+
+
+
+## Labor Market
+
+
+Through December, US jobs report showed tighter labor market condition.  Employer added 156,000 jobs in December, missing the expectations of 175,000.  However, the November figure was revised higher to 204,000 from 178,000, according to the Labor Department's employment report. Average hourly earnings increased by 2.9 percent in December, the strongest pace since the last recession ended in June 2009. See the US Labor Cost charts. 
+
+## US Labor Cost
+
+```{r US Labor Cost Chart,  echo=FALSE,  warning=FALSE, cache=TRUE}
+
+############################################################
+# Labor Cost Data
+############################################################
+
+
+# https://www.ft.com/content/7d97f1b2-e492-11e6-8405-9e5580d6e5fb  
+
+
+select_colors_scale <- c(
+  nord_palettes$aurora[1] ,
+  nord_palettes$frost[4]
+  
+)
+
+
+
+select_symbols <- c( "Civilian Unemployment Rate"  ,
+                     "Total Civilian Unemployment Rate" ) #
+
+select_Symbols_names <- c("AHE YOY% Index"  , "ECI YOY Index") # 
+c("Average Hourly Earnings", "Employment Cost Index")
+
+my_start_date <- "2000-01-01" %>% as.Date()
+my_end_date <- today()
+# econ_tbl %>% filter(category %in% "EMPLOYMENT")
+df <- econ_df %>%
+  filter(variables %in% select_symbols) %>%
+  mutate(values = values /100 ) %>%  # add year variable
+  filter(dates >= my_start_date)
+
+
+# set x-axis limits
+my_xlim <-  my_axis_fun( df , dates ) %>% as.Date()
+
+my_xlim[2] <- my_xlim[2] + months(24)
+my_xlim
+
+text_df <- filter(df , dates == "2010-04-01" )
+
+# https://www.ft.com/content/7d97f1b2-e492-11e6-8405-9e5580d6e5fb
+p <- df %>%
+  filter( between(  dates ,  my_start_date , my_end_date ) ) %>%
+  ggplot(aes(x=dates,y=values,color=variables))+
+  geom_line(alpha=1,size=1.2) +
+  annotate(geom = "text", x = text_df$dates,
+           y = text_df$values ,
+           label = text_df$variables , #%>% map_chr( wrapper,width = 14 ) , 
+            size = 3,
+            hjust = -0.1 ,vjust = -.0,
+           color = select_colors_scale,
+           fontface = "bold", cex = 4.5) + # ,  hjust = -.4, vjust = -.5
+  # scale_color_manual(values =c("#a06872","#000080"),labels = rev(select_symbols_names))+
+  scale_x_date(expand = c(0,0), limits = my_xlim, date_breaks = "2 year", date_labels = "%Y") +
+  scale_y_continuous(label=scales::percent) +
+  scale_color_manual(values = select_colors_scale)+
+  # scale_color_viridis(option="D",end=0.9,discrete = TRUE)+
+  theme_minimal()+
+  theme(plot.caption=element_text(hjust=0))+
+  labs(x="",y="",title="US Employment Condition",
+       caption="Source: U.S. Bureau of Labor Statistics\nNote: Total Unemployment Rate accounts for total unemployed, plus all marginally attached workers\nplus total employed part time for economic reasons.")+
+ # theme_Publication()+
+  theme( legend.position = "none")
+ # theme( legend.justification = c(0, 1), legend.position = c(0, 1),legend.title = element_blank() )
+
+p
+
+pic_list$laborcost_p <- p
+
+
+
+```
+
+
+
+## US Labor Participation Rate
+
+The jobless rate increased by 0.1 percentage point to 4.7 percent in December, but remains close to a nine-year low. Despite the signs of robust labor market conditions, A more comprehensive picture of unemployment, which includes workers forced to take part-time jobs because full-time positions were not available, still stood at 9.2 percent in December.  With employment cost index, a Fed's preferred wage measure, still remains subdued relative to average hourly earnings, Fed may wait to rate rates until the labor market shows more broad based recovery. See the US Employment Condition chart.
+
+
+```{r US Employment Chart, warning=FALSE, cache=TRUE, echo=FALSE}
+
+############################################################
+# Extract CPI Data
+############################################################
+
+select_colors_scale <- c(
+  nord_palettes$aurora[1] ,
+  nord_palettes$frost[4]
+  
+)
+
+select_symbols <- c( 'Civilian Labor Force Participation Rate',
+              'Civilian Labor Force Participation Rate: 25 to 54 years',
+              'Civilian Labor Force Participation Rate: Men',
+              'Civilian Labor Force Participation Rate: Women') #
+
+
+
+my_start_date <- "1960-01-01" %>% as.Date()
+my_end_date <- today()
+
+# econ_tbl %>% filter(category %in% "EMPLOYMENT")
+df <- econ_df %>%
+  filter(variables %in% select_symbols) %>%
+  mutate(values = values /100 ) %>%  # add year variable
+ filter( between(  dates ,  my_start_date , my_end_date ) )
+
+
+# set x-axis limits
+my_xlim <-  my_axis_fun( df , dates ) %>% as.Date()
+
+my_xlim[2] <- my_xlim[2] + months(4)
+my_xlim
+
+text_df <- filter(df , dates == "2010-04-01" )
+
+# https://www.ft.com/content/7d97f1b2-e492-11e6-8405-9e5580d6e5fb
+p <- df %>%
+  filter( between(  dates ,  my_start_date , my_end_date ) ) %>%
+  ggplot(aes(x=dates,y=values,color=variables))+
+  geom_line(alpha=1,size=1.2) +
+  annotate(geom = "text", x = text_df$dates,
+           y = text_df$values ,
+           label = text_df$variables , #%>% map_chr( wrapper,width = 14 ) , 
+            size = 3,
+            hjust = -0.1 ,vjust = -.0,
+           color = select_colors_scale,
+           fontface = "bold", cex = 4.5) + # ,  hjust = -.4, vjust = -.5
+  # scale_color_manual(values =c("#a06872","#000080"),labels = rev(select_symbols_names))+
+  scale_x_date(expand = c(0,0), limits = my_xlim, date_breaks = "2 year", date_labels = "%Y") +
+  scale_y_continuous(label=scales::percent) +
+  scale_color_manual(values = select_colors_scale)+
+  # scale_color_viridis(option="D",end=0.9,discrete = TRUE)+
+  theme_minimal()+
+  theme(plot.caption=element_text(hjust=0))+
+  labs(x="",y="",title="US Employment Condition",
+       caption="Source: U.S. Bureau of Labor Statistics\nNote: Total Unemployment Rate accounts for total unemployed, plus all marginally attached workers\nplus total employed part time for economic reasons.")+
+ # theme_Publication()+
+  theme( legend.position = "none")
+ # theme( legend.justification = c(0, 1), legend.position = c(0, 1),legend.title = element_blank() )
+
+p
+
+pic_list$employ_p <- p
+
+
+
+ # geom_hline( yintercept = text_df$values, linetype="dotted" ) +
+ 
+#ggsave('Result/employ_p.png', width = 16, height = 9) #, width = 16, height = 9, dpi =
+
+
+```
+
+
+## US Employment
+
+The jobless rate increased by 0.1 percentage point to 4.7 percent in December, but remains close to a nine-year low. Despite the signs of robust labor market conditions, A more comprehensive picture of unemployment, which includes workers forced to take part-time jobs because full-time positions were not available, still stood at 9.2 percent in December.  With employment cost index, a Fed's preferred wage measure, still remains subdued relative to average hourly earnings, Fed may wait to rate rates until the labor market shows more broad based recovery. See the US Employment Condition chart.
+
+
+```{r US Employment Chart, warning=FALSE, cache=TRUE, echo=FALSE}
+
+############################################################
+# Extract CPI Data
+############################################################
+
+select_colors_scale <- c(
+  nord_palettes$aurora[1] ,
+  nord_palettes$frost[4]
+  
+)
+
+
+
+select_symbols <- c( "Civilian Unemployment Rate"  ,
+                     "Total Civilian Unemployment Rate" ) #
+
+select_symbols_names <- c("Unemployment Rate" , "Total Unemployment Rate") #
+
+my_start_date <- "2000-01-01" %>% as.Date()
+my_end_date <- today()
+# econ_tbl %>% filter(category %in% "EMPLOYMENT")
+df <- econ_df %>%
+  filter(variables %in% select_symbols) %>%
+  mutate(values = values /100 ) %>%  # add year variable
+  filter(dates >= my_start_date)
+
+
+# set x-axis limits
+my_xlim <-  my_axis_fun( df , dates ) %>% as.Date()
+
+my_xlim[2] <- my_xlim[2] + months(24)
+my_xlim
+
+text_df <- filter(df , dates == "2010-04-01" )
+
+# https://www.ft.com/content/7d97f1b2-e492-11e6-8405-9e5580d6e5fb
+p <- df %>%
+  filter( between(  dates ,  my_start_date , my_end_date ) ) %>%
+  ggplot(aes(x=dates,y=values,color=variables))+
+  geom_line(alpha=1,size=1.2) +
+  annotate(geom = "text", x = text_df$dates,
+           y = text_df$values ,
+           label = text_df$variables , #%>% map_chr( wrapper,width = 14 ) , 
+            size = 3,
+            hjust = -0.1 ,vjust = -.0,
+           color = select_colors_scale,
+           fontface = "bold", cex = 4.5) + # ,  hjust = -.4, vjust = -.5
+  # scale_color_manual(values =c("#a06872","#000080"),labels = rev(select_symbols_names))+
+  scale_x_date(expand = c(0,0), limits = my_xlim, date_breaks = "2 year", date_labels = "%Y") +
+  scale_y_continuous(label=scales::percent) +
+  scale_color_manual(values = select_colors_scale)+
+  # scale_color_viridis(option="D",end=0.9,discrete = TRUE)+
+  theme_minimal()+
+  theme(plot.caption=element_text(hjust=0))+
+  labs(x="",y="",title="US Employment Condition",
+       caption="Source: U.S. Bureau of Labor Statistics\nNote: Total Unemployment Rate accounts for total unemployed, plus all marginally attached workers\nplus total employed part time for economic reasons.")+
+ # theme_Publication()+
+  theme( legend.position = "none")
+ # theme( legend.justification = c(0, 1), legend.position = c(0, 1),legend.title = element_blank() )
+
+p
+
+pic_list$employ_p <- p
+
+
+
+ # geom_hline( yintercept = text_df$values, linetype="dotted" ) +
+ 
+#ggsave('Result/employ_p.png', width = 16, height = 9) #, width = 16, height = 9, dpi =
+
+
+```
+

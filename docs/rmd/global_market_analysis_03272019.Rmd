@@ -1,0 +1,1275 @@
+---
+title: "Global Market Analysis"
+subtitle: "An investigation into market direction"
+author: "Hyungjin Lim"
+date: "`r Sys.Date()`"
+output: tint::tintHtml
+bibliography: skeleton.bib
+link-citations: yes
+editor_options:
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+library(tint)
+# invalidate cache when the package version changes
+knitr::opts_chunk$set(tidy = FALSE, cache.extra = packageVersion('tint'))
+options(htmltools.dir.version = FALSE)
+
+```
+
+# Currency Market Update...
+
+
+In a nutshell, our frameworks and analysis (both conventional and unconventional) suggest the multi-year bull market in the US Dollar is not dead.
+
+Capital is likely to continue to concentrate in the USA at least for the foreseeable future with global banking system and also European issues likely to create further flights into the US Dollar from time to time (our analysis suggesting that presently we could be seeing the
+beginnings again of another sub-cycle of escalating risks out of the Eurozone). 
+
+This will likely also cause the continued outperformance of the US Equity Market vs. the rest of the world's equity markets.
+
+A Simple model for currencies is articulated by George Soros...
+
+> "Speculative capital moves in search of the highest total return. Total Return has 3 elements:
+(1) The interest rate differential, (2) The FX rate, (3) The capital appreciation in local currency.
+Expectations about future exchange rates constitute the main motivation in speculative capital flow."
+>
+> `r tufte::quote_footer('--- George Soros, The Alchemy of Finance.')`
+
+
+We can proxy some of these things (in a single chart) by looking at 
+
+1.  the relative 10yr Sovereign Bond yield spread between two currency blocs
+2.  the relative total return share market performances between the two currency blocs. 
+
+These two simple things we find help us to see at a glance the major underlying trends indicative of capital flows and
+capital market pricing trends in a manner that is relevant to the currency pair in question. ^[It should be noted that a currency pair will tend to move in tandem (positive correlation) with the 10yr Bond Yield Spread unless confidence in a nations government/currency is lost, in which case the excessive inflationary conditions due to the deterioration of confidence (unhealthy increases in velocity and quantity of liquidity in one country) will see the relationship between the bond yield spread and the currency move to an inverse correlation (i.e. with a deterioration in the nation's bond market matched with a weakening of the currency).]
+
+
+## The relative 10yr Sovereign Bond yield spread
+
+Global bond yield spread continues widening since the beginning of 2018, as US economy outperformed the rest of the world. 
+Given the strength of on-going US economic growth, US interest rate is expected to widen relative to the rest of major economies. 
+
+With RSI making lower high, the Spread will make new high. 
+
+
+```{r glb_yield_spread, tidy = TRUE, fig.fullwidth = TRUE , warning=FALSE, message=FALSE, cache=TRUE, echo=FALSE}
+
+# http://www.prerequisite.com.au/wp-content/uploads/2018/04/2018-04-25-Quarterly-Client-BRIEFING.pdf
+
+# the relative 10yr Sovereign Bond yield spread between two currency blocs
+
+
+my_start_date <- "2000-01-01" %>% as.Date()
+my_end_date <- today() #"2018-06-30" %>% as.Date()
+
+my_review_date <- "2014-01-01" %>% as.Date()
+# select_colors_scale <- getPalette(2)
+
+
+
+############################################################
+# First Data
+############################################################
+
+
+select_symbols <- c( 'USGG10YR Index', # # 'US Generic Govt Bond 10 Year'
+                     #'GECU10YR Index',   # 'Euro Generic Govt Bond 10 Year'
+                     'GDBR10 Index', # 'Germany Generic Govt Bond 10 Year'
+                     'GUKG10 Index',  # 'UK Generic Govt Bond 10 Year'
+                     'GJGB10 Index' ) #, 'Japan Generic Govt Bond 10 Year'
+#'GACGB10 Index' )#
+
+
+select_symbols_names <- c( "USA", # S&P 500 Utilities Sector Index GICS Level 1
+                           "Euro Area",
+                           # "Germany",
+                           "UK",
+                           "Japan") #,
+# "Australia")
+select_colors_scale <-   c(
+  nord_palettes$aurora[1] ,
+  nord_palettes$frost[4] ,
+  nord_palettes$frost[3]
+  
+)
+
+
+
+
+df <- bloomberg_df %>%
+  filter(symbol %in% select_symbols ) %>%
+  left_join(
+    tibble(select_symbols_names ,select_symbols ) , by  = c("symbol" = "select_symbols")
+  )
+
+# df %>% distinct( select_symbols_names)
+
+df <- df %>%
+  mutate(month = as.factor(month(dates))) %>%  # add year variable
+  # compute year over year growth rate
+  arrange(dates) %>%
+  mutate(values = values/100) %>%
+  filter( between( dates ,my_start_date, my_end_date) ) %>%
+  na.omit() %>%
+  select(dates,values,select_symbols_names) %>%
+  spread(select_symbols_names,values ) %>%
+  gather( symbol, values, -dates, -USA) %>%
+  group_by( dates ) %>%
+  mutate( Average = mean( values, na.rm = TRUE )) %>%
+  ungroup() %>%
+  spread( symbol,values) %>%
+  gather( variables, values, -dates, -USA) %>%
+  mutate( values = ( USA - values ) ) %>%
+  select( dates, variables, values ) # %>%   spread(variables, spread)
+
+
+df <-  df %>%
+  filter(  variables %in%  "Average")
+
+df <-  df %>%  
+  tibbletime::as_tbl_time( index = dates ) %>% 
+  tibbletime::as_period( period = "weekly") 
+
+
+#*****************************************************************
+# Plot http://drawar.github.io/posts/add-borders-annotate-outside-ggplot/
+#******************************************************************
+
+my_xlim <-  my_axis_fun( df , dates ) %>% as.Date()
+my_xlim[2] <- my_xlim[2] # %m+% months(30)
+# my_xlim
+
+my_title <- "Global 10 Year Bond Yield Spread"
+my_subtitle <- "10yr Bond Yield Spread (USA vs. Average: Euro Area, UK, Japan)"
+my_y_lab <- "Percent"
+
+
+p <-  ggplot()+
+  # geom_rect(data=  filter(recession_df, start >=  min(df$dates, na.rm =TRUE )) ,
+  #           aes(xmin= start, xmax= end, ymin=-Inf, ymax=+Inf),
+  #           fill="gray", alpha=0.35) +
+  geom_line(data =df %>% filter( between( dates , my_review_date , today()))
+            , aes(x=dates,y=values, color = variables),
+            alpha=1,size=1) +
+  
+  scale_color_manual(  values = select_colors_scale ) +
+  scale_x_date(expand = c(0,0), limits = c( my_review_date , my_xlim[2]) , date_breaks = "1 year" , date_labels = "%Y" ) +
+  scale_y_continuous( name = my_y_lab ,label=scales::percent) +
+  # annotate(geom = "text",
+  #           x = text_df$dates , y = text_df$values ,
+  #          label = text_df$variables, size = 5,
+  #         fontface = 'bold', color = text_df$colors,  vjust = 0, hjust = 0) +
+  theme_minimal() + theme_ipsum() +
+  theme( plot.caption=element_text(hjust=0),
+         legend.position = "none",
+         axis.text.y.left = element_text(colour= select_colors_scale[1]),
+         axis.title.y = element_text(color= select_colors_scale[1])) +
+  labs( title= my_title,
+        subtitle = my_subtitle) +
+  # theme_Publication()
+  NULL
+
+df_rsi <- df %>%
+  drop_na( values ) %>% 
+  group_by( variables ) %>%
+  tq_mutate(select     = values , 
+            mutate_fun = RSI, 
+            n      = 14 ,  
+            maType     = SMA) %>% 
+  ungroup() %>% 
+  mutate( variables = "RSI" ,
+          values = rsi) %>% 
+  select( - rsi ) 
+
+# find the lowest point after 2017
+
+rsi_line_df <-  df_rsi %>% filter( dates >= "2017-01-01" %>% as.Date) %>% 
+  filter( values == min( values, na.rm = TRUE) )
+
+
+rsi_line_df <- bind_rows(
+  rsi_line_df ,
+  
+  df_rsi %>% filter( between( dates , rsi_line_df$dates[1] %>% as.Date + days(1), today())) %>% 
+    filter( values == min( values, na.rm = TRUE) )
+  
+)
+
+
+
+
+p_rsi <-  ggplot()+
+  geom_line(data = df_rsi %>% filter( between( dates , my_review_date , today())),
+            aes(x=dates,y=values, color = variables),
+            alpha=1,size=1) +
+  
+  annotate("segment", x = rsi_line_df$dates[1] , xend = rsi_line_df$dates[2], 
+           y = rsi_line_df$values[1] , yend = rsi_line_df$values[2],
+           colour = "black") +
+  
+  scale_color_manual(  values = select_colors_scale[2] ) +
+  scale_x_date(expand = c(0,0), limits = c( my_review_date , my_xlim[2]), date_breaks = "1 year" , date_labels = "%Y" ) +
+  theme_minimal() + theme_ipsum() +
+  theme( plot.caption=element_text(hjust=0),
+         legend.position = "none",
+         axis.text.y.left = element_text(colour= select_colors_scale[2]),
+         axis.title.y = element_text(color= select_colors_scale[2])) +
+  labs( y = "RSI") +
+  # theme_Publication()
+  NULL
+
+p + p_rsi + plot_layout(ncol = 1, heights = c(3, 2))
+
+
+
+```
+
+
+
+
+## US Dollar Trend
+
+Trade-Weighted US Dollar, DXY, ADXY all went up year-to-date in 2018.
+
+1.  Based on yield spread, US Dollar needs to retrace somewhat.
+2.  Retrace on the spread RSI movement shows that USD will rally further eventually.
+
+
+
+```{r US_Dollar,  fig.fullwidth = TRUE ,  fig.width = 12,  echo=FALSE, warning=FALSE, cache=TRUE}
+
+# fig.width = 12,
+#*****************************************************************
+# US Dollar, US 10 Year Rates, Libor-OIS
+#******************************************************************
+
+my_start_date <- "2000-01-01" %>% as.Date()
+my_end_date <- today() # "2018-06-30" %>% as.Date()
+
+# select_colors_scale <- getPalette(2)
+
+
+my_review_date <- "2014-01-01" %>% as.Date()
+
+############################################################
+# First Data
+############################################################
+
+select_symbols_names <- c(  'DXY Curncy',
+                            "USTWBROA Index",# US Trade Weighted Broad Dollar
+                            'ADXY Index') 
+
+select_names <- c( "US Dollar Index",
+                   "Broad US Dollar Index",
+                   "Asia Dollar Index")
+
+df <- bloomberg_df %>%
+  rename(variables = symbol) %>%
+  filter(variables %in% select_symbols_names) %>%
+  left_join(
+    tibble(select_symbols_names ,select_names ) , by  = c("variables" = "select_symbols_names")
+  ) %>%
+  filter( between( dates ,my_start_date, my_end_date) )  %>%
+  na.omit() %>%
+  select(dates,values,select_names) %>%
+  group_by( select_names ) %>%
+  arrange(dates) %>%
+  mutate( values = (values-lag(values,1))/lag(values,1)) %>%
+  mutate( values = if_else( select_names %in%  "Asia Dollar Index", - values, values )) %>% 
+  na.omit() %>%
+  mutate( values = 100*cumprod(1+values) ) %>%
+  ungroup() %>%
+  spread(select_names,values) %>%
+  na.locf() %>%
+  gather(variables, values, -dates) %>%
+  mutate( values = as.numeric(values), dates = as.Date(dates))
+
+df <- df %>% filter( dates >= my_review_date )
+
+my_xlim <-  my_axis_fun( df , dates ) %>% as.Date()
+my_xlim[2] <- my_xlim[2] # %m+% months(16)
+# my_xlim
+
+select_colors_scale <-   c(
+  nord_palettes$aurora[1] ,
+  nord_palettes$aurora[4] ,
+  nord_palettes$frost[3]
+  
+)
+
+select_colors_scale  <- tibble(
+  colors = select_colors_scale ,
+  variables = c( df$variables %>% unique())
+)
+
+
+text_df <-  tibble( variables = select_colors_scale$variables,
+                    colors = select_colors_scale$colors,
+                    dates = rep(my_end_date ,3),
+                    # dates = c("2008-06-26","2015-06-26", "2015-06-26") %>% as.Date(),
+                    values = df %>% 
+                      filter(dates == dplyr::last(dates), variables %in%  select_colors_scale$variables ) %>% 
+                      pull(values))     #c(105, 115,80))
+
+
+df <- df %>% mutate( variables = factor( variables, levels = text_df$variables))
+
+#*****************************************************************
+# Plot http://drawar.github.io/posts/add-borders-annotate-outside-ggplot/
+#******************************************************************
+
+my_title <- "Global Capital Flow - Demand for US Dollar"
+my_caption <- "Source: Bloomberg\nNote: Asia Dollar Index is inverted to be aligned with Dollar Index.\nAll indices used a base value of 100 at the start of 2000."
+my_y_lab <- "Cumulative Performance"
+
+p <-  ggplot()+
+  geom_line(data =  df , aes(x=dates,y=values, color = variables),
+            alpha=1,size=1) +
+  scale_color_manual(  values =select_colors_scale$colors ) +
+  scale_x_date(expand = c(0,0), limits = my_xlim, date_breaks = "2 year" , date_labels = "%Y" ) +
+  theme_minimal() + 
+  theme_ipsum() +
+  theme( plot.caption=element_text(hjust=0),
+         legend.position = "top", 
+         legend.title = element_blank(),
+         axis.text.y.left = element_text(colour= select_colors_scale$colors[1]),
+         axis.text.y.right = element_text(color =  select_colors_scale$colors[2]),
+         axis.title.y = element_text(color= select_colors_scale$colors[1]),
+         axis.title.y.right = element_text(color= select_colors_scale$colors[2]) ) +
+  labs( title= my_title , y = my_y_lab ,
+        caption= my_caption ) +
+  # theme_Publication()
+  NULL
+
+p <- p %>%  # add reccesion shade
+  my_area_func( recession_df ,  my_start_date )
+
+# pic_list$usd_flow_p <- p
+
+p
+# ggsave('output_data/img/usd_flow_p.png') #, width = 16, height = 9, dpi =
+
+
+
+
+
+
+```
+
+
+
+
+### Asian Dollor Market (China)
+
+
+```{r Asian_Dollar, fig.margin=TRUE,     echo=FALSE, warning=FALSE, cache=TRUE}
+
+
+#*****************************************************************
+# US Dollar, US 10 Year Rates, Libor-OIS
+#******************************************************************
+
+my_start_date <- "2014-01-01" %>% as.Date()
+my_end_date <- today() # "2018-06-30" %>% as.Date()
+
+# select_colors_scale <- getPalette(2)
+
+
+
+############################################################
+# First Data
+############################################################
+
+select_symbols_names <- c(   'ADXY Index') 
+
+select_names <- c( "Asia Dollar Index")
+
+df <- bloomberg_df %>%
+  rename(variables = symbol) %>%
+  filter(variables %in% select_symbols_names) %>%
+  left_join(
+    tibble(select_symbols_names ,select_names ) , by  = c("variables" = "select_symbols_names")
+  ) %>%
+  filter( between( dates ,my_start_date, my_end_date) )  %>%
+  na.omit() %>%
+  select(dates,values,select_names) %>%
+  group_by( select_names ) %>%
+  arrange(dates) %>%
+  mutate( values = (values-lag(values,1))/lag(values,1)) %>%
+  mutate( values = if_else( select_names %in%  "Asia Dollar Index", - values, values )) %>% 
+  na.omit() %>%
+  mutate( values = 100*cumprod(1+values) ) %>%
+  ungroup() %>%
+  spread(select_names,values) %>%
+  na.locf() %>%
+  gather(variables, values, -dates) %>%
+  mutate( values = as.numeric(values), dates = as.Date(dates))
+
+
+my_xlim <-  my_axis_fun( df , dates ) %>% as.Date()
+my_xlim[2] <- my_xlim[2] %m+% months(3)
+# my_xlim
+
+select_colors_scale <-   c(
+  nord_palettes$aurora[1] ,
+  nord_palettes$aurora[4] ,
+  nord_palettes$frost[3]
+  
+)
+
+select_colors_scale  <- tibble(
+  colors = select_colors_scale ,
+  variables = c( df$variables %>% unique())
+)
+
+
+df <- df %>% mutate( variables = factor( variables ))
+
+#*****************************************************************
+# Plot http://drawar.github.io/posts/add-borders-annotate-outside-ggplot/
+#******************************************************************
+
+my_title <- "Asian Dolloar market: ADX Index"
+my_caption <- "Source: Bloomberg\nNote: Asia Dollar Index is inverted to be aligned with Dollar Index.\nAll indices used a base value of 100 at the start of 2000."
+my_y_lab <- "Cumulative Performance"
+
+p <-  ggplot()+
+  geom_line(data =  df, aes(x=dates,y=values, color = variables),
+            alpha=1,size=1) +
+  scale_color_manual(  values =select_colors_scale$colors ) +
+  scale_x_date(expand = c(0,0), limits = my_xlim, date_breaks = "2 year" , date_labels = "%Y" ) +
+  theme_minimal() + 
+  theme_ipsum() +
+  theme( plot.caption=element_text(hjust=0),
+         legend.position = "none",
+         axis.text.y.left = element_text(colour= select_colors_scale$colors[1]),
+         axis.text.y.right = element_text(color =  select_colors_scale$colors[2]),
+         axis.title.y = element_text(color= select_colors_scale$colors[1]),
+         axis.title.y.right = element_text(color= select_colors_scale$colors[2]) ) +
+  labs( title= my_title , y = my_y_lab ,
+        caption= my_caption ) +
+  # theme_Publication()
+  NULL
+
+p <- p %>%  # add reccesion shade
+  my_area_func( recession_df ,  my_start_date )
+
+
+p
+
+
+
+
+
+```
+
+
+Asian markets, especially China, has depreciated much due to domestic financial market deleveraging and a trade war with the US. The rate of depreciation was very rapid this year and correction seems to be a possibility.
+
+
+
+
+**A intermediate term trade opportunity to long Asian EM markets.**
+
+
+**The trick would be to monitor trade conflicts between US and China.**
+
+
+
+
+
+# Relative Total Return Share Market Performances 
+
+As the graph below illustrates, US equity market's outperformance is quite remarkable and seems too stretched at this point. 
+At minimum, retrace is warranted relative to EM. 
+
+**How will the diverging spread converge?**
+
+**Either International rebounds or US equity market needs to go down.** 
+
+Given the measured move down and the way market held up amidst bearish news, especially after upside surprises to US wage growth on September 7th, it appears that International, especially EM, **will rally to resolve this divergence.**
+
+```{r US-International Rotation, fig.fullwidth = TRUE ,echo=FALSE, warning=FALSE, cache= TRUE }
+
+
+my_start_date <- "2015-01-01" %>% as.Date()
+my_end_date <- today() # "2018-06-30" %>% as.Date()
+
+# select_colors_scale <- getPalette(2)
+
+
+
+############################################################
+# First Data
+############################################################
+
+
+select_symbols_names <- c("RAY Index", # Russell 3000 Index
+                          "MXWDU Index") #MSCI ACWI Excluding United States Index
+
+select_names <- c("US",
+                  "International")
+
+df <- bloomberg_df %>%
+  rename(variables = symbol) %>%
+  filter(variables %in% select_symbols_names) %>%
+  left_join(
+    tibble(select_symbols_names ,select_names ) , by  = c("variables" = "select_symbols_names")
+  ) %>%
+  filter( between( dates ,my_start_date, my_end_date) )  %>%
+  group_by(variables) %>%
+  arrange(dates) %>%
+  mutate(rets = (values - lag(values,1))/lag(values,1)) %>%
+  ungroup() %>%
+  na.omit() %>%
+  select(dates,rets,select_names) %>%
+  spread(select_names,rets) %>%
+  mutate(delta = .[["US"]]  - .[["International"]] ) %>%
+  gather(variables, values, -dates) %>%
+  group_by(variables) %>%
+  arrange(dates) %>%
+  na.omit() %>%
+  mutate( values = 100*cumprod(1+values)) %>%
+  ungroup() %>%
+  filter(variables %in% "delta") %>%
+  mutate( variables = "US vs. International")
+
+
+#*****************************************************************
+# Second Data
+#******************************************************************
+
+
+
+select_symbols_names <- c(  'DXY Curncy',
+                            "USTWBROA Index") # US Trade Weighted Broad Dollar
+
+select_names <- c( "US Dollar Index",
+                   "Broad US Dollar Index")
+
+df2 <- bloomberg_df %>%
+  rename(variables = symbol) %>%
+  filter(variables %in% select_symbols_names) %>%
+  left_join(
+    tibble(select_symbols_names ,select_names ) , by  = c("variables" = "select_symbols_names")
+  ) %>%
+  filter( between( dates ,my_start_date, my_end_date) )  %>%
+  na.omit() %>%
+  select(dates,values,select_names) %>%
+  group_by( select_names ) %>%
+  arrange(dates) %>%
+  mutate( values = (values-lag(values,1))/lag(values,1)) %>%
+  na.omit() %>%
+  mutate( values = 100*cumprod(1+values) ) %>%
+  ungroup() %>%
+  spread(select_names,values) %>%
+  na.locf() %>%
+  gather(variables, values, -dates) %>%
+  mutate( values = as.numeric(values), dates = as.Date(dates))
+
+
+
+# Normalizer to bring 2nd data into 1st data range. This makes
+# highest bar equal to highest point. You can use a different
+# normalization if you want (e.g., this could be the constant 15
+# like you had in your example, though that's fragile if the data
+# changes).
+first_df_max <- max(df$values)
+second_df_max <- max(df2$values)
+
+if( first_df_max > second_df_max ){
+  
+  normalizer <- first_df_max  / second_df_max
+  
+}else{
+  
+  normalizer <- second_df_max  / first_df_max
+  
+}
+
+
+
+my_xlim <-  my_axis_fun( df , dates ) %>% as.Date()
+my_xlim[2] <- my_xlim[2] %m+% months(12)
+# my_xlim
+
+select_colors_scale <-   c(
+  nord_palettes$aurora[1] ,
+  nord_palettes$frost[4] ,
+  nord_palettes$frost[3]
+  
+)
+
+select_colors_scale  <- tibble(
+  colors = select_colors_scale ,
+  variables = c( df$variables %>% unique() ,
+                 df2$variables %>% unique())
+)
+
+
+text_df <-  tibble( variables = select_colors_scale$variables,
+                    colors = select_colors_scale$colors,
+                    dates = c("2013-06-26","2006-06-26", "2015-06-26") %>% as.Date(),
+                    values = c(80, 130,100))
+
+
+text_df <-  tibble( variables = select_colors_scale$variables,
+                    colors = select_colors_scale$colors,
+                    dates = rep(my_end_date ,3),
+                    values = df %>% 
+                      filter(dates == dplyr::last(dates), variables %in%  select_colors_scale$variables ) %>% 
+                      pull(values))  
+
+df <- df %>% bind_rows( df2)
+df <- df %>% mutate( variables = factor( variables, levels = text_df$variables))
+
+#*****************************************************************
+# Plot http://drawar.github.io/posts/add-borders-annotate-outside-ggplot/
+#******************************************************************
+
+my_title <- "Global Capital Flow"
+my_caption <- "Source: Bloomberg\nNote: The relative cumulative performances of \"US vs. International\" are represented by Russell 3000 and\nMSCI ACWI-ex US Indicies using a base value of 100 at the start of 2000."
+my_y_lab <- "Cumulative Performance"
+my_2nd_y_lab <- ""
+
+p <-  ggplot()+
+  
+  geom_line(data = filter( df, variables %in% "US vs. International"), aes(x=dates,y=values, color = variables),
+            alpha=1,size=1) +
+  geom_line(data = filter( df, !variables %in% "US vs. International"), aes(x=dates,y= values*normalizer, color = variables),
+            alpha=1, size=1  ) +
+  scale_color_manual(  values = c( "US vs. International" = "#BF616A",
+                                   "Broad US Dollar Index" = "#5E81AC" ,
+                                   "US Dollar Index"  = "#81A1C1") ) +
+  # scale_x_date(expand = c(0,0), limits = my_xlim, date_breaks = "2 year" , date_labels = "%Y" ) +
+  scale_y_continuous( name = my_y_lab ,
+                      sec.axis = sec_axis(trans= ~./normalizer,
+                                          name = my_2nd_y_lab )) +
+  
+  # annotate(geom = "text",
+  #         x = text_df$dates , y = text_df$values ,
+  #         label = text_df$variables, size = 4,
+  #         fontface = 'bold', color = text_df$colors,  vjust = 0, hjust = 0) +
+  theme_minimal() + theme_ipsum() +
+  theme( plot.caption=element_text(hjust=0),
+         legend.title = element_blank(),
+         #  legend.position=c(0,.85), 
+         # legend.justification=c(0, -0.1), 
+         legend.position = "top", legend.direction = "horizontal" ,
+         axis.text.y.left = element_text(colour= select_colors_scale$colors[1]),
+         axis.text.y.right = element_text(color =  select_colors_scale$colors[2]),
+         axis.title.y = element_text(color= select_colors_scale$colors[1]),
+         axis.title.y.right = element_text(color= select_colors_scale$colors[2]) ) +
+  labs( title= my_title ,
+        caption= my_caption ) +
+  # theme_Publication()
+  NULL
+
+
+p <- p %>%  # add reccesion shade
+  my_area_func( recession_df ,  my_start_date )
+
+
+# pic_list$cap_flow_p <- p
+
+p
+# ggsave('output_data/img/cap_flow_p.png') #, width = 16, height = 9, dpi =
+
+# pic_list$gbl_spread_p + pic_list$cap_flow_p +  plot_layout(ncol = 1)
+
+```
+
+
+
+We blended some tables in the above code chunk only as _placeholders_ to make sure there is enough vertical space among the margin figures, otherwise they will be stacked tightly together. For a practical document, you should not insert too many margin figures consecutively and make the margin crowded. 
+
+You do not have to assign captions to figures. We show three figures with no captions below in the margin, in the main column, and in full width, respectively.
+
+
+```{r Year-over-Year returns Relationshiop, fig.fullwidth = TRUE ,fig.width = 12, fig.height= 6, echo=FALSE, warning=FALSE, cache=TRUE}
+# a boxplot of weight vs transmission; this figure
+# will be placed in the margin
+
+
+# http://socviz.co/refineplots.html#case-studies
+
+my_start_date <- "2000-01-01" %>% as.Date()
+my_end_date <- today() # "2018-06-30" %>% as.Date()
+
+# select_colors_scale <- getPalette(2)
+
+select_colors_scale <-   c(
+  nord_palettes$aurora[1] ,
+  nord_palettes$aurora[2] ,
+  nord_palettes$frost[4] ,
+  nord_palettes$frost[3]
+  
+)
+
+############################################################
+# First Data
+############################################################
+
+
+select_symbols_names <- c( 'DXY Curncy',
+                           "USTWBROA Index",
+                           "RAY Index", # Russell 3000 Index
+                           "MXWDU Index") #MSCI ACWI Excluding United States Index
+
+select_names <- c( "US Dollar Index",
+                   "Broad US Dollar Index" ,
+                   "US",
+                   "International")
+
+
+
+df <- bloomberg_df %>%
+  rename(variables = symbol) %>%
+  filter(variables %in% select_symbols_names) %>%
+  left_join(
+    tibble(select_symbols_names ,select_names ) , by  = c("variables" = "select_symbols_names")
+  ) %>%
+  filter( between( dates ,my_start_date, my_end_date) )  %>%
+  mutate( variables = select_names ) %>% 
+  group_by( variables ) %>%
+  tq_transmute(
+    select = values,
+    mutate_fun = ROC ,
+    n = 252 ,
+    type = "discrete" ,
+    col_rename = "values"
+  ) %>% 
+  ungroup() %>% 
+  select(dates,variables,values) %>%
+  spread(variables,values) %>%
+  mutate( `US vs International` = .[["US"]]  - .[["International"]] ) %>%
+  gather(variables, values, - dates , - `US vs International` ) %>% 
+  filter( !variables %in% c( "US" , "International")) %>% 
+  mutate( periods = case_when (  dates >= as.Date("2018-01-01") & dates < as.Date("2018-04-01")  ~ "2018 Q1" ,
+                                 dates >= as.Date("2018-04-01") ~ "2018 Q2" ,
+                                 TRUE ~ "Before 2018"
+  )
+  )
+
+#*****************************************************************
+# Plot http://drawar.github.io/posts/add-borders-annotate-outside-ggplot/
+#******************************************************************
+
+my_title <- "US Dolloar vs. Global Captial Flow"
+my_subtitle <- "Year-over-year returns relationship"
+my_caption <- "Source: Bloomberg\nNote: The relative cumulative performances of \"US vs. International\" are represented by Russell 3000 and\nMSCI ACWI-ex US Indicies using a base value of 100 at the start of 2000."
+
+
+p <- df %>% 
+  ggplot( mapping = aes( x =  `US vs International`   , y = values ) ) 
+
+p + geom_point( aes( color = periods  ) , alpha = 0.3 ) +
+  geom_smooth(method = "lm" , se = FALSE, color = "gray80") +
+  facet_wrap( ~variables ) +
+  scale_color_manual(  values = select_colors_scale[c(1,2,4)] ) +
+  scale_y_percent( ) +
+  scale_x_percent( ) +
+  theme_minimal() + theme_ipsum() +
+  theme( legend.position = "top") +
+  labs( title = my_title ,
+        subtitle =  my_subtitle ,
+        color = "Period: ",
+        caption= my_caption  ) +
+  NULL
+
+
+```
+
+
+```{r reg_analysis,  fig.margin = TRUE ,  echo=FALSE, warning=FALSE, cache = TRUE}
+
+
+
+
+#*****************************************************************
+# Regression analysis
+#******************************************************************
+
+fit_ols <- function(data , xvar ) {
+  
+  expr <- enquo( xvar )
+  # change column name
+  data <- mutate(  data , !!quo_name( expr ) :=  values )
+  # create formula
+  my_formula <- str_glue( "`US vs International` ~ " , "`", xvar, "`" ) %>% as.formula()
+  # run regression
+  lm(  my_formula , data = data)
+  
+}
+
+out_tidy <-  df %>%
+  group_by( variables , periods ) %>%
+  nest() %>% 
+  mutate(model = map2( .x = data, .y = variables, fit_ols) ,
+         tidied = map(model, tidy, conf.int = TRUE)) 
+
+out_tidy <- out_tidy  %>%
+  mutate( augumented = map( model, augment), 
+          glanced = map( model, glance)
+  )
+
+
+#*****************************************************************
+# coefficient plots
+#******************************************************************
+
+
+my_title <- "Estimates of the association between relative share market performance and US Dollar strength, pooled by different indices" 
+
+select_colors_scale <-   c(
+  nord_palettes$aurora[1] ,
+  nord_palettes$frost[4] 
+  
+)
+
+p <- out_tidy %>%
+  unnest(tidied, .drop = TRUE) %>%
+  filter( !term %in% "(Intercept)") %>% 
+  ggplot(data = .,
+         mapping = aes(x = periods , y = estimate,
+                       ymin = conf.low , # estimate - 2*std.error,
+                       ymax = conf.high, #estimate + 2*std.error,
+                       group = variables , color = variables ))
+
+p + geom_pointrange(position = position_dodge(width = 1)) +
+  scale_x_discrete(breaks = unique(df$periods)) + 
+  scale_color_manual( values = select_colors_scale ) +
+  theme_minimal() + theme_ipsum() +
+  labs(title = my_title %>% str_wrap() , 
+       x = "Study Period", y = "Estimate", color = "Index") + 
+  theme(legend.position = "top") +
+  NULL
+
+
+
+
+
+
+```
+
+
+
+
+
+
+```{r reg_table,  fig.fullwidth = TRUE, results = "asis", echo=FALSE, warning = FALSE, cache = TRUE}
+
+
+
+
+out_tidy %>% 
+  # filter(  variables  %in% "Broad US Dollar Index" ) %>% 
+  pull( model ) %>% 
+  stargazer::stargazer( title= "Regression Results" ,
+                        column.labels =   out_tidy$periods   , 
+                        #    covariate.labels =  c("Broad US Dollar Index" ),
+                        align = TRUE, type = "html"  ) 
+
+
+
+
+```
+
+
+
+
+# Defining Liquidity
+
+Liquidity consists of all cash and credit available to financial markets, once the immediate transactions needs of the real economy have been fulfilled
+
+It is a sources and not a uses of funds definition. Money supply, a rival concept, is a uses of funds measure because it comprises bank deposits. Banks are no longer the dominant conduit for liquidity, and credit is a more powerful guide to purchasing power than deposit money.
+
+Moreover, liquidity cannot be measured by interest rates, as the 2007/08 financial crisis has shown. For example, low base interest rates and tight liquidity mean wide spreads and a high effective cost of funds.
+
+Liquidity transmits its influence to the real economy and financial markets through duration. Duration is a hybrid between liquidity preference and time preference, i.e. it measures the effect of liquidity over time. Investors and businesses target a desired duration and change their asset mix to attain these targets. Liquidity hastens and smooths this adjustment; illiquidity forces it to become abrupt and often disruptive. Changes in duration affect the composition of the capital structure and the mix of investments. Modern business cycles have become more cycles of duration than growth^[See Liquidity definition [defining liquidity](http://www.liquidity.com/definingliquidity.aspx)].
+
+Pressure in the US Dollar funding market received much attention at the beginning of 2018, as the spread between USD Libor and Treasury rate has gone up. It came down, however, to a normal level.
+
+The following analysis was done in the framework of BIS research^[Global liquidity and procyclicality](http://www.bis.org/speeches/sp160608.pdf)] and relies on NY Federal Reserve research.
+
+No sign of any imminent liquidity issue in global banking sector, which is good for risk-on.
+
+
+
+```{r TED-spread, fig.fullwidth = TRUE,   warning=FALSE,  cache=TRUE,echo=FALSE}
+
+
+
+
+#*****************************************************************
+# set paramters
+#******************************************************************
+
+my_start_date <- "2010-01-01" %>% as.Date() # today() - years(3)
+my_end_date <- today() #"2018-06-30" %>% as.Date()
+
+
+select_symbols <-  c(
+  
+  "BASPTDSP Index" ) # TED spread
+
+
+select_symbols_names <- c(
+  
+  "TED spread")
+select_colors_scale <-   c(
+  
+  nord_palettes$aurora[1]
+  
+)
+
+
+
+
+df <- bloomberg_df %>%
+  filter(symbol %in% select_symbols ) %>%
+  left_join(
+    tibble(select_symbols_names ,select_symbols ) , by  = c("symbol" = "select_symbols")
+  )
+
+
+df <- df %>%
+  mutate( values = values/100 ) %>% 
+  filter( between( dates ,my_start_date, my_end_date) )
+
+
+#*****************************************************************
+# Plot http://drawar.github.io/posts/add-borders-annotate-outside-ggplot/
+#******************************************************************
+
+
+my_xlim <-  my_axis_fun( df , dates ) %>% as.Date()
+
+
+#*****************************************************************
+# Plot http://drawar.github.io/posts/add-borders-annotate-outside-ggplot/
+#******************************************************************
+
+my_title <- "Liquidity Condition In the Global Financial Markets"
+my_subtitle <- "TED Spread"
+my_caption <- "Source: BIS"
+my_y_lab <- "Percent"
+my_2nd_y_lab <- ""
+
+p <-  ggplot()+
+  geom_line(data =  df , aes(x=dates,y=values,color= symbol ),
+            alpha=1, size=1) +
+  scale_color_manual( values = select_colors_scale) +
+  scale_x_date(date_breaks = "2 year", date_labels = "%Y") +
+  scale_y_continuous( label=scales::percent , name = my_y_lab ) +
+  
+  theme_minimal() + theme_ipsum() +
+  theme(plot.caption=element_text(hjust=0),
+        axis.text.y.left = element_text(colour= select_colors_scale[1]),
+        axis.text.y.right = element_text(color =  select_colors_scale[2]),
+        axis.title.y = element_text(color= select_colors_scale[1]),
+        axis.title.y.right = element_text(color= select_colors_scale[2]) ) +
+  labs( title= my_title ,
+        subtitle = my_subtitle,
+        caption= my_caption ) + 
+  theme( legend.position = "none")
+# theme_Publication()
+NULL
+
+
+
+p
+
+
+
+```
+
+
+Cross currency swap market activity confirms this.
+
+```{r Cross_Currency_Market, fig.fullwidth = TRUE,   warning=FALSE, cache=TRUE,echo=FALSE}
+
+
+
+
+#*****************************************************************
+# set paramters
+#******************************************************************
+
+my_start_date <- "2010-01-01" %>% as.Date() # today() - years(3)
+my_end_date <- today() #"2018-06-30" %>% as.Date()
+
+
+select_symbols <-  c(
+  "EUBS1 CMPN Curncy",
+  "JYBS1 CMPN Curncy",
+  "BPBS1 CMPN Curncy" ) # TED spread
+
+
+select_symbols_names <- c(
+  "Euro",
+  "Yen",
+  "Pound")
+select_colors_scale <-   c(
+  nord_palettes$aurora[1] ,
+  nord_palettes$aurora[3] ,
+  
+  nord_palettes$frost[4]
+  
+)
+
+
+
+
+df <- bloomberg_df %>%
+  filter(symbol %in% select_symbols ) %>%
+  left_join(
+    tibble(select_symbols_names ,select_symbols ) , by  = c("symbol" = "select_symbols")
+  )
+
+# df %>% group_by( symbol) %>% skimr::skim()
+
+df <- df %>%
+  mutate( values = values/100 ) %>% # ,
+  #    values = if_else( symbol %in%  "EUBS1 CMPN Curncy", -values, values)) %>% 
+  filter( between( dates ,my_start_date, my_end_date) )
+
+
+#*****************************************************************
+# Plot http://drawar.github.io/posts/add-borders-annotate-outside-ggplot/
+#******************************************************************
+
+
+my_xlim <-  my_axis_fun( df , dates ) %>% as.Date()
+
+
+#*****************************************************************
+# Plot http://drawar.github.io/posts/add-borders-annotate-outside-ggplot/
+#******************************************************************
+
+my_title <- "Liquidity Condition In the Global Financial Markets"
+my_subtitle <- "1 Year Cross Currency"
+my_caption <- "Source: BIS"
+my_y_lab <- "Percent"
+
+p <-  ggplot()+
+  geom_line(data = df , aes(x= dates,y=values,color= select_symbols_names ),
+            alpha=1, size=1)  +
+  scale_color_manual( values = select_colors_scale ) +
+  
+  scale_x_date(date_breaks = "1 year", date_labels = "%Y") +
+  scale_y_continuous(label=scales::percent , name = my_y_lab) +
+  theme_minimal() + theme_ipsum() +
+  labs( title= my_title ,
+        subtitle = my_subtitle,
+        caption= my_caption ) +
+  theme( plot.caption=element_text(hjust=0),
+         legend.title = element_blank(),
+         #  legend.position=c(0,.85), 
+         # legend.justification=c(0, -0.1), 
+         legend.position = "top", legend.direction = "horizontal" ) +
+  # theme_Publication()
+  NULL
+
+
+
+p
+
+
+# pic_list$liquidity_p <- p
+
+# ggsave('output_data/img/liquidity_p.png') #, width = 16, height = 9, dpi =
+
+
+
+```
+
+
+
+##  US Treasuries:
+
+Essentially a sustained reflationary dynamic is unlikely without the participation of the
+banks, especially in light of still problematic liquidity conditions in the world. Our previous
+Quarterly Letter touches upon some of these issues should you be interested (more
+comprehensive analyses of these issues are within our PCS Reports, complementary to our
+Portfolio Clients (minimum account balances apply) or available via subscription).
+
+
+Key Takeaway:
+
+The majority of liquidity creation occurs
+within the Commercial & Shadow Banking Systems of the
+world, even despite the efforts of Central banks over the
+last 10 years, global banks and the financial system
+continues to flounder. The recent rise in bond yields is
+likely to prove transitory yet again in the same way that
+similar occurrences have over the last 15 years, nothing
+has really been resolved in the broader financial system, if
+anything the strains appear to be slowly escalating again.
+
+
+Given banking sector performance, Treasury yield seems to go down.
+
+```{r  US Treasury Yield Direction Chart, fig.fullwidth = TRUE,  fig.width = 12, warning=FALSE, cache=TRUE,echo=FALSE}
+
+
+
+my_start_date <- "2000-01-01" %>% as.Date()
+my_end_date <- today() #"2018-06-30" %>% as.Date()
+
+# select_colors_scale <- getPalette(2)
+
+select_colors_scale <-   c(
+  
+  nord_palettes$frost[4] ,
+  nord_palettes$aurora[1]
+)
+
+############################################################
+# First Data
+############################################################
+
+# Monetary_Symbols_Names
+# select interested variables
+select_symbols_names <- c("2-Year CMT"  ,"10-Year CMT"  ) #
+
+
+df <- econ_df %>%
+  filter(variables %in% select_symbols_names ) %>%
+  filter( between( dates ,my_start_date, my_end_date), !is.na(values)  ) %>%
+  select(dates,values,variables) %>%
+  spread(variables  , values) %>%
+  mutate(`US Curve` = .[["10-Year CMT"]] - .[["2-Year CMT"]] ) %>% # caculate yield curve
+  gather(variables, values, -dates) %>%
+  mutate( values = values/100, pos =values) %>%
+  group_by(variables) %>%
+  mutate(pos = min(values,na.rm=TRUE)) %>%
+  ungroup()
+
+df <-  df %>%
+  filter( variables %in% "10-Year CMT" ) %>% # "US Curve"
+  filter(!is.na(values))
+
+
+#*****************************************************************
+# Second Data
+#******************************************************************
+
+
+select_symbols_names <- c(  "MXWD0BK Index" , # MSCI ACWI Banks Index "S5BANKX Index", # 
+                            'NDUEACWF Index') # MSCI ACWI Net TR USD Index  'SPX Index') #
+
+
+select_names <- c( "World Bank",
+                   "World")
+
+
+df2 <- bloomberg_df %>%
+  rename(variables = symbol) %>%
+  filter(variables %in% select_symbols_names) %>%
+  left_join(
+    tibble(select_symbols_names ,select_names ) , by  = c("variables" = "select_symbols_names")
+  ) %>%
+  filter( between( dates ,my_start_date, my_end_date) )  %>%
+  group_by(variables) %>%
+  arrange(dates) %>%
+  mutate(rets = (values - lag(values,1))/lag(values,1)) %>%
+  ungroup() %>%
+  na.omit() %>%
+  select(dates,rets,select_names) %>%
+  spread(select_names,rets) %>%
+  mutate(delta = .[["World Bank"]]  - .[["World"]] ) %>%
+  gather(variables, values, -dates) %>%
+  group_by(variables) %>%
+  arrange(dates) %>%
+  na.omit() %>%
+  mutate(values = 100*cumprod(1+values)) %>%
+  ungroup() %>%
+  filter(variables %in% "delta")
+
+
+# Normalizer to bring 2nd data into 1st data range. This makes
+# highest bar equal to highest point. You can use a different
+# normalization if you want (e.g., this could be the constant 15
+# like you had in your example, though that's fragile if the data
+# changes).
+normalizer <- max(df$values) / max(df2$values)
+
+
+
+text_df <-  tibble( dates = as.Date("2005-01-30"), values = 0.025 ,variables = "US Treasury 10-Year Yield") %>%
+  bind_rows(
+    tibble( dates = as.Date("2014-01-30") , values = 110*normalizer ,variables =  "MSCI World Bank vs. World Stock")
+    
+  )
+
+
+#*****************************************************************
+# Plot http://drawar.github.io/posts/add-borders-annotate-outside-ggplot/
+#******************************************************************
+
+my_title <- "Direction of US Treasury Yield"
+my_caption <- "Source: Federal Reserve\nNote: The relative cumulative performances of \"MSCI World Bank vs. World\" are represented by MSCI ACWI Bank and MSCI ACWI Indicies\nusing a base value of 100 at the start of 2000."
+my_y_lab <- "Percent"
+my_2nd_y_lab <- "Cumulative Performance"
+
+p <-  ggplot()+
+  # geom_rect(data=  filter(recession_df, start >=  min(df$dates, na.rm =TRUE )) ,
+  #          aes(xmin= start, xmax= end, ymin=-Inf, ymax=+Inf),
+  #          fill="gray", alpha=0.35) +
+  geom_line(data = df, aes(x=dates,y=values,color=variables),
+            alpha=1,color =  select_colors_scale[1] ,size=1) +
+  geom_line(data = df2, aes(x=dates,y= values*normalizer,color=variables),
+            alpha=1,color =  select_colors_scale[2] ,size=1) +
+  
+  scale_x_date(date_breaks = "2 year", date_labels = "%Y") +
+  scale_y_continuous(label=scales::percent , name = my_y_lab ,
+                     sec.axis = sec_axis(trans= ~./normalizer,
+                                         name = my_2nd_y_lab )) +
+  
+  annotate(geom = "text",
+           x = text_df$dates , y = text_df$values ,
+           label = text_df$variables , size = 5,
+           fontface = 'bold', color = select_colors_scale ,  vjust = .0) +
+  theme_minimal() + theme_ipsum() +
+  theme(plot.caption=element_text(hjust=0),
+        axis.text.y.left = element_text(colour= select_colors_scale[1]),
+        axis.text.y.right = element_text(color =  select_colors_scale[2]),
+        axis.title.y = element_text(color= select_colors_scale[1]),
+        axis.title.y.right = element_text(color= select_colors_scale[2]) ) +
+  labs( title= my_title ,
+        caption= my_caption ) +
+  # theme_Publication()
+  NULL
+
+p <- p %>%  # add reccesion shade
+  my_area_func( recession_df ,  my_start_date )
+
+
+# pic_list$bank_p <- p
+
+p
+
+# ggsave('output_data/img/bank_p.png') #, width = 16, height = 9, dpi =
+
+
+
+
+
+```
+
+
+```{r eval=FALSE, echo=FALSE}
+file.edit(
+  tint:::template_resources(
+    'tint', '..', 'skeleton', 'skeleton.Rmd'
+  )
+)
+```
+
+```{r bib, include=FALSE}
+# create a bib file for the R packages used in this document
+knitr::write_bib(c('base', 'rmarkdown'), file = 'skeleton.bib')
+```
