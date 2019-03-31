@@ -1,0 +1,17 @@
+[
+  {
+    "path": "posts/US_Dollar/",
+    "title": "Untitled",
+    "description": "A new article created using the Distill format.",
+    "author": [
+      {
+        "name": "Nora Jones",
+        "url": "https://example.com/norajones"
+      }
+    ],
+    "date": "2019-03-31",
+    "categories": [],
+    "preview": {},
+    "last_modified": "2019-03-31T11:39:30-05:00"
+  }
+]
