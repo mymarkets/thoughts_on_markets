@@ -1,8 +1,13 @@
 name: "thoughts_on_markets"
 title: "My Website"
+listing: posts
+base_url: https://www.mymarketthoughts.com
+twitter:
+  site: "@GKim39553835"
 description: |
-  My Website
+  Exploring financial market dynamics
 output_dir: "docs"
+exclude: ["*.Rmd", "*.R", ".RData",  ".Rmd",".rds"]
 navbar:
   right:
     - text: "Home"
