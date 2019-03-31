@@ -1,12 +1,5 @@
-.Rproj.user
-.Rhistory
-.RData
-.R
-.Rmd
-.rds
-.Ruserdata
-raw_data
-output_data
-rmd
-sandbox
-scripts
+# Ignore everything
+*
+!.gitignore
+!docs/**/*.html
+

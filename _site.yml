@@ -7,7 +7,7 @@ twitter:
 description: |
   Exploring financial market dynamics
 output_dir: "docs"
-exclude: ["*.Rmd", "*.R", ".RData",  ".Rmd",".rds"]
+exclude: ["*.Rmd", "*.R", ".RData",  ".Rmd",".rds","rmd","sandbox", "scripts","raw_data", "output_data"]
 navbar:
   right:
     - text: "Home"
