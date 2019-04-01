@@ -1,5 +1,5 @@
 name: "thoughts_on_markets"
-title: "My Thoughts on Financial Markets"
+title: "My Thoughts on Global Financial Markets"
 description: |
   Exploring financial market dynamics.
 exclude: ["*.Rmd", "*.R", ".RData",  ".Rmd",".rds","rmd","sandbox", "scripts","raw_data", "output_data"]

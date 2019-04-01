@@ -1,6 +1,6 @@
 [
   {
-    "path": "posts/2019Q1/US_Dollar/",
+    "path": "posts/2019Q1/",
     "title": "Will the US dollar go up?",
     "description": "Impact of interest rate differential on currency movements.",
     "author": [
@@ -11,8 +11,8 @@
     ],
     "date": "2019-04-01",
     "categories": [],
-    "preview": "posts/2019Q1/US_Dollar/distill-preview.png",
-    "last_modified": "2019-04-01T02:46:03-05:00",
+    "preview": "posts/2019Q1/distill-preview.png",
+    "last_modified": "2019-04-01T02:53:54-05:00",
     "preview_width": 1813,
     "preview_height": 770
   }

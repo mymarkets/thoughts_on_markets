@@ -1,5 +1,5 @@
 ---
-title: "My thoughts on global financial markets"
+title: "My thoughts on financial markets"
 site: distill::distill_website
 listing: posts
 ---
