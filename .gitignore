@@ -1,5 +1,10 @@
-# Ignore everything
-*
-!.gitignore
-!docs/**/*.html
-
+.Rproj.user
+.Rhistory
+.RData
+.Ruserdata
+_site
+rmd
+sandbox
+scripts
+raw_data
+output_data
