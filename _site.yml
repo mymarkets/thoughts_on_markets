@@ -1,13 +1,12 @@
 name: "thoughts_on_markets"
-title: "My Website"
-listing: posts
+title: "My Thoughts on Financial Markets"
+description: |
+  Exploring financial market dynamics.
+exclude: ["*.Rmd", "*.R", ".RData",  ".Rmd",".rds","rmd","sandbox", "scripts","raw_data", "output_data"]
 base_url: https://www.mymarketthoughts.com
+output_dir: "docs"
 twitter:
   site: "@GKim39553835"
-description: |
-  Exploring financial market dynamics
-output_dir: "docs"
-exclude: ["*.Rmd", "*.R", ".RData",  ".Rmd",".rds","rmd","sandbox", "scripts","raw_data", "output_data"]
 navbar:
   right:
     - text: "Home"
@@ -15,3 +14,6 @@ navbar:
     - text: "About"
       href: about.html
 output: distill::distill_article
+
+
+
