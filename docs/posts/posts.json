@@ -1,20 +1,5 @@
 [
   {
-    "path": "posts/2019-03-31-the-sharpe-ratio/",
-    "title": "The Sharpe Ratio",
-    "description": "A short description of the post.",
-    "author": [
-      {
-        "name": "Nora Jones",
-        "url": "https://example.com/norajones"
-      }
-    ],
-    "date": "2019-03-31",
-    "categories": [],
-    "preview": {},
-    "last_modified": "2019-03-31T11:53:16-05:00"
-  },
-  {
     "path": "posts/US_Dollar/",
     "title": "Untitled",
     "description": "A new article created using the Distill format.",
@@ -27,6 +12,46 @@
     "date": "2019-03-31",
     "categories": [],
     "preview": {},
-    "last_modified": "2019-03-31T11:39:30-05:00"
+    "last_modified": "2019-03-31T16:43:21-05:00"
+  },
+  {
+    "path": "posts/2017-03-07-quandl-and-forecasting/",
+    "title": "Quandl and Forecasting",
+    "description": "In this post, we will explore commodity prices using data from Quandl, a repository for both free and paid data sources. We will also get into the forecasting game a bit and think about how best to use dygraphs when visualizing predicted time series as an extension of historical data.",
+    "author": [
+      {
+        "name": "Jonathan Regenstein",
+        "url": "https://www.linkedin.com/in/jkregenstein/"
+      }
+    ],
+    "date": "2017-03-07",
+    "categories": [
+      "forecasting",
+      "dygraphs"
+    ],
+    "preview": "posts/2017-03-07-quandl-and-forecasting/preview.png",
+    "last_modified": "2019-03-31T17:11:36-05:00",
+    "preview_width": 1656,
+    "preview_height": 927
+  },
+  {
+    "path": "posts/2016-11-08-sharpe-ratio/",
+    "title": "The Sharpe Ratio",
+    "description": "In this post we present a classic finance use case using the PerformanceAnalytics, quantmod, and dygraphs packages. We'll demonstrate importing stock data, building a portfolio, and then calculating the Sharpe Ratio.",
+    "author": [
+      {
+        "name": "Jonathan Regenstein",
+        "url": "https://www.linkedin.com/in/jkregenstein/"
+      }
+    ],
+    "date": "2016-11-08",
+    "categories": [
+      "portfolios",
+      "dygraphs"
+    ],
+    "preview": "posts/2016-11-08-sharpe-ratio/preview.png",
+    "last_modified": "2019-03-31T17:11:35-05:00",
+    "preview_width": 1644,
+    "preview_height": 1014
   }
 ]

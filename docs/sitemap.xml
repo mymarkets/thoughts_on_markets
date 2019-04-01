@@ -2,22 +2,26 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd" version="1.0">
   <url>
     <loc>https://www.mymarketthoughts.com/about.html</loc>
-    <lastmod>2019-03-30T19:37:10-05:00</lastmod>
+    <lastmod>2019-03-31T17:11:35-05:00</lastmod>
   </url>
   <url>
     <loc>https://www.mymarketthoughts.com/</loc>
-    <lastmod>2019-03-30T08:20:26-05:00</lastmod>
+    <lastmod>2019-03-31T17:11:35-05:00</lastmod>
   </url>
   <url>
     <loc>https://www.mymarketthoughts.com/README.html</loc>
     <lastmod>2019-03-30T08:21:15-05:00</lastmod>
   </url>
   <url>
-    <loc>https://www.mymarketthoughts.com/posts/2019-03-31-the-sharpe-ratio/</loc>
-    <lastmod>2019-03-31T11:53:16-05:00</lastmod>
+    <loc>https://www.mymarketthoughts.com/posts/US_Dollar/</loc>
+    <lastmod>2019-03-31T16:43:21-05:00</lastmod>
   </url>
   <url>
-    <loc>https://www.mymarketthoughts.com/posts/US_Dollar/</loc>
-    <lastmod>2019-03-31T11:39:30-05:00</lastmod>
+    <loc>https://www.mymarketthoughts.com/posts/2017-03-07-quandl-and-forecasting/</loc>
+    <lastmod>2019-03-31T17:11:36-05:00</lastmod>
+  </url>
+  <url>
+    <loc>https://www.mymarketthoughts.com/posts/2016-11-08-sharpe-ratio/</loc>
+    <lastmod>2019-03-31T17:11:35-05:00</lastmod>
   </url>
 </urlset>
