@@ -16,23 +16,5 @@
       <guid>https://www.mymarketthoughts.com/posts/US_Dollar</guid>
       <pubDate>¿œ, 31 3 2019 00:00:00 +0000</pubDate>
     </item>
-    <item>
-      <title>Quandl and Forecasting</title>
-      <dc:creator>Jonathan Regenstein</dc:creator>
-      <link>https://www.mymarketthoughts.com/posts/2017-03-07-quandl-and-forecasting</link>
-      <description>In this post, we will explore commodity prices using data from Quandl, a repository for both free and paid data sources. We will also get into the forecasting game a bit and think about how best to use dygraphs when visualizing predicted time series as an extension of historical data.</description>
-      <guid>https://www.mymarketthoughts.com/posts/2017-03-07-quandl-and-forecasting</guid>
-      <pubDate>»≠, 07 3 2017 00:00:00 +0000</pubDate>
-      <media:content url="https://www.mymarketthoughts.com/posts/2017-03-07-quandl-and-forecasting/preview.png" medium="image" type="image/png" width="1656" height="927"/>
-    </item>
-    <item>
-      <title>The Sharpe Ratio</title>
-      <dc:creator>Jonathan Regenstein</dc:creator>
-      <link>https://www.mymarketthoughts.com/posts/2016-11-08-sharpe-ratio</link>
-      <description>In this post we present a classic finance use case using the PerformanceAnalytics, quantmod, and dygraphs packages. We'll demonstrate importing stock data, building a portfolio, and then calculating the Sharpe Ratio.</description>
-      <guid>https://www.mymarketthoughts.com/posts/2016-11-08-sharpe-ratio</guid>
-      <pubDate>»≠, 08 11 2016 00:00:00 +0000</pubDate>
-      <media:content url="https://www.mymarketthoughts.com/posts/2016-11-08-sharpe-ratio/preview.png" medium="image" type="image/png" width="1644" height="1014"/>
-    </item>
   </channel>
 </rss>

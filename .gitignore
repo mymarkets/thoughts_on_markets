@@ -3,6 +3,7 @@
 .RData
 .Ruserdata
 _site
+_posts
 rmd
 sandbox
 scripts
