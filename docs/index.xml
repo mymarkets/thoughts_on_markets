@@ -7,14 +7,15 @@
     <description>Exploring financial market dynamics.
 </description>
     <generator>Distill</generator>
-    <lastBuildDate>일, 31 3 2019 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>월, 01 4 2019 00:00:00 +0000</lastBuildDate>
     <item>
-      <title>Untitled</title>
-      <dc:creator>Nora Jones</dc:creator>
-      <link>https://www.mymarketthoughts.com/posts/US_Dollar</link>
-      <description>A new article created using the Distill format.</description>
-      <guid>https://www.mymarketthoughts.com/posts/US_Dollar</guid>
-      <pubDate>일, 31 3 2019 00:00:00 +0000</pubDate>
+      <title>Will the US dollar go up?</title>
+      <dc:creator>G. Kim</dc:creator>
+      <link>https://www.mymarketthoughts.com/posts/2019Q1/US_Dollar</link>
+      <description>Impact of interest rate differential on currency movements.</description>
+      <guid>https://www.mymarketthoughts.com/posts/2019Q1/US_Dollar</guid>
+      <pubDate>월, 01 4 2019 00:00:00 +0000</pubDate>
+      <media:content url="https://www.mymarketthoughts.com/posts/2019Q1/US_Dollar/distill-preview.png" medium="image" type="image/png" width="1813" height="770"/>
     </item>
   </channel>
 </rss>

@@ -1,17 +1,19 @@
 [
   {
-    "path": "posts/US_Dollar/",
-    "title": "Untitled",
-    "description": "A new article created using the Distill format.",
+    "path": "posts/2019Q1/US_Dollar/",
+    "title": "Will the US dollar go up?",
+    "description": "Impact of interest rate differential on currency movements.",
     "author": [
       {
-        "name": "Nora Jones",
-        "url": "https://example.com/norajones"
+        "name": "G. Kim",
+        "url": "https://www.mymarketthoughts.com/"
       }
     ],
-    "date": "2019-03-31",
+    "date": "2019-04-01",
     "categories": [],
-    "preview": {},
-    "last_modified": "2019-03-31T16:43:21-05:00"
+    "preview": "posts/2019Q1/US_Dollar/distill-preview.png",
+    "last_modified": "2019-04-01T02:46:03-05:00",
+    "preview_width": 1813,
+    "preview_height": 770
   }
 ]
